@@ -1,0 +1,19 @@
+{
+  "name": "viral-visualizer-renderer",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "render.js",
+  "scripts": {
+    "render": "node render.js"
+  },
+  "dependencies": {
+    "canvas": "^2.11.2",
+    "ffmpeg-static": "^5.2.0",
+    "fluent-ffmpeg": "^2.1.2",
+    "gl": "^8.1.6",
+    "mkdirp": "^3.0.1",
+    "pngjs": "^7.0.0",
+    "simplex-noise": "^4.0.1",
+    "three": "^0.181.1"
+  }
+}
