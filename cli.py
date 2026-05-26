@@ -146,7 +146,8 @@ def main():
                 ["npm", "install"],
                 cwd=renderer_dir,
                 check=True,
-                capture_output=True
+                capture_output=True,
+                shell=(sys.platform == "win32")
             )
 
         log(f"Rendering '{args.mode}' with '{args.palette}' palette...")
@@ -155,7 +156,8 @@ def main():
         proc = subprocess.run(
             ["node", "render.js", str(analysis_json), str(params_json), str(analysis_input)],
             cwd=renderer_dir,
-            capture_output=False  # stream renderer output directly
+            capture_output=False,
+            shell=(sys.platform == "win32")
         )
 
         if proc.returncode != 0:

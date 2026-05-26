@@ -144,7 +144,7 @@ def analyze_audio(
         duration=duration,
         fps=fps,
         totalFrames=total_frames,
-        bpm=float(tempo),
+        bpm=float(np.atleast_1d(tempo)[0]),
         beats=beats,
         drops=drops,
         frames=frames
