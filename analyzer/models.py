@@ -2,14 +2,16 @@ from typing import List, Optional
 from pydantic import BaseModel
 
 
+# ── Audio Analysis Models ─────────────────────────────────────────────────────
+
 class FFTBands(BaseModel):
-    subBass: float
-    bass: float
-    lowMid: float
-    mid: float
-    highMid: float
-    presence: float
-    brilliance: float
+    subBass: float    # 20-60Hz
+    bass: float       # 60-250Hz
+    lowMid: float     # 250-500Hz
+    mid: float        # 500Hz-2kHz
+    highMid: float    # 2kHz-4kHz
+    presence: float   # 4kHz-6kHz
+    brilliance: float # 6kHz-20kHz
 
 
 class AnalysisFrame(BaseModel):
@@ -58,6 +60,8 @@ class AnalysisResult(BaseModel):
     frames: List[AnalysisFrame]
 
 
+# ── Render Params (replaces shared/renderParams.ts) ───────────────────────────
+
 class ClipRange(BaseModel):
     start: float
     end: float
@@ -78,7 +82,7 @@ class RenderFormat(BaseModel):
 class RenderParams(BaseModel):
     seed: int
 
-    mode: str
+    mode: str   # liquidGlass | wireframe | particleSwarm | radialFFT
     palette: str
 
     sensitivity: float = 1.0
