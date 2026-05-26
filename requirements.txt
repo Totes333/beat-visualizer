@@ -1,10 +1,6 @@
-fastapi
-uvicorn[standard]
-python-multipart
 pydantic
 numpy
 scipy
 librosa
 soundfile
 ffmpeg-python
-aiofiles

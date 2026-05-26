@@ -5,14 +5,13 @@ Usage:
   python cli.py <input_file> [options]
 
 Examples:
-  python cli.py my_beat.mp4
-  python cli.py my_beat.mp4 --mode particleSwarm --palette cyberpunk
-  python cli.py my_beat.mp4 --mode radialFFT --palette sunset --start 0 --end 30
-  python cli.py my_beat.mp4 --track-name "My Beat" --producer "@me" --output my_video.mp4
+  python cli.py my_beat.wav
+  python cli.py my_beat.wav --mode particleSwarm --palette cyberpunk
+  python cli.py my_beat.wav --mode radialFFT --palette sunset --start 0 --end 30
+  python cli.py my_beat.wav --track-name "My Beat" --producer "@me" --output my_video.mp4
 """
 
 import argparse
-import json
 import subprocess
 import sys
 import tempfile
@@ -32,11 +31,11 @@ def parse_args():
     p = argparse.ArgumentParser(
         description="Generate a music visualizer video from an audio/video file."
     )
-    p.add_argument("input", help="Input .mp4, .mov, .mkv, or .wav/.mp3 file")
+    p.add_argument("input", help="Input .mp4, .mov, .mkv, .wav, or .mp3 file")
 
     # Visual
     p.add_argument("--mode", choices=VISUAL_MODES, default="particleSwarm",
-                   help=f"Visual mode (default: particleSwarm)")
+                   help="Visual mode (default: particleSwarm)")
     p.add_argument("--palette", choices=PALETTES, default="cyberpunk",
                    help="Color palette (default: cyberpunk)")
     p.add_argument("--seed", type=int, default=42,
@@ -79,17 +78,22 @@ def log(msg: str):
 def main():
     args = parse_args()
 
-    input_path = Path(args.input)
+    input_path = Path(args.input).resolve()
     if not input_path.exists():
         print(f"Error: file not found: {input_path}")
         sys.exit(1)
+
+    # FIX: resolve output to absolute path NOW, before cwd changes inside subprocess.
+    # Without this, render.js does path.resolve("output.mp4") relative to renderer/
+    # and the file lands in renderer/output.mp4 instead of the project root.
+    output_path = Path(args.output).resolve()
 
     print("\n🎵 beat-visualizer\n")
 
     with tempfile.TemporaryDirectory() as tmp:
         tmp = Path(tmp)
 
-        # ── Step 1: Extract audio if video file ──────────────────────────────
+        # ── Step 1: Extract audio if video file ───────────────────────────────
         video_extensions = {".mp4", ".mov", ".mkv", ".avi", ".webm"}
         if input_path.suffix.lower() in video_extensions:
             log(f"Extracting audio from {input_path.name}...")
@@ -97,6 +101,7 @@ def main():
             extract_audio(str(input_path), str(wav_path))
             analysis_input = wav_path
         else:
+            # .wav / .mp3 / etc — pass directly to librosa
             analysis_input = input_path
 
         # ── Step 2: Analyze audio ─────────────────────────────────────────────
@@ -131,7 +136,7 @@ def main():
                 enabled=not args.no_text and bool(args.track_name or args.producer)
             ),
             format=RenderFormat(width=args.width, height=args.height, fps=args.fps),
-            outputFileName=args.output,
+            outputFileName=str(output_path),  # absolute path — critical
             dropThreshold=args.drop_threshold
         )
 
@@ -164,7 +169,7 @@ def main():
             print("\nRenderer failed.")
             sys.exit(proc.returncode)
 
-    print(f"\n✅ Done → {args.output}\n")
+    print(f"\n✅ Done → {output_path}\n")
 
 
 if __name__ == "__main__":
